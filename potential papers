@@ -20,7 +20,7 @@ Transcriptomic analysis of PADI4 target genes during multi-lineage differentiati
 
 #-----------------------------------------------
 
-I'm going to try with these 3
+Try with these 3
 
 PLEKHS1 drives PI3Ks and remodels pathway homeostasis in PTEN-null prostate.
 https://pubmed.ncbi.nlm.nih.gov/37567175/ 
@@ -32,6 +32,9 @@ Lots of data and plots - would be a nice one to use, but probably need to talk t
 An integrated proteome and transcriptome of B cell maturation defines poised activation states of transitional and mature B cells
 Immunology - Martin Turner 
 Looks quite nice for barplots, interactive scatter plots etc.
+
+https://www.nature.com/articles/s41467-023-40621-2/figures/4
+Data S2
 
 
 Multi-omics analyses demonstrate a critical role for EHMT1 methyltransferase in transcriptional repression during oogenesis.

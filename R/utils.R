@@ -1,7 +1,9 @@
+library(bslib)
+library(ggplot2)
 
 papercard <- #list(
   card(
-    max_height = 350,
+    #max_height = 350,
     full_screen = TRUE,
     card_header("An integrated proteome and transcriptome of B cell maturation defines poised activation states of transitional and mature B cells"),
     p("Fiamma Salerno, Andrew J. M. Howden, Louise S. Matheson, Özge Gizlenci, Michael Screen, Holger Lingel, Monika C. Brunner-Weinzierl & Martin Turner"),
@@ -10,8 +12,8 @@ papercard <- #list(
     p("During B cell maturation, transitional and mature B cells acquire cell-intrinsic features that determine their ability to exit quiescence and mount effective immune responses. Here we use label-free proteomics to quantify the proteome of B cell subsets from the mouse spleen and map the differential expression of environmental sensing, transcription, and translation initiation factors that define cellular identity and function. Cross-examination of the full-length transcriptome and proteome identifies mRNAs related to B cell activation and antibody secretion that are not accompanied by detection of the encoded proteins. In addition, proteomic data further suggests that the translational repressor PDCD4 restrains B cell responses, in particular those from marginal zone B cells, to a T-cell independent antigen. In summary, our molecular characterization of B cell maturation presents a valuable resource to further explore the mechanisms underpinning the specialized functions of B cell subsets, and suggest the presence of ‘poised’ mRNAs that enable expedited B cell responses."
     )
   )
-#)
-#
+
+
 value_boxes <- list(
   single_cell = value_box(
     title = NULL,
@@ -20,7 +22,7 @@ value_boxes <- list(
   ),
   proteomics = value_box(
     title = NULL,
-    value = "Proteomics",
+    value = actionButton("proteomics", "Proteomics"),
     showcase = tags$img(src = "proteomics_pic.PNG", width = "100", height = "100")
     #tags$img(src = "bioinformatics_logo_small.png", width = "200", height = "71")
   ),
@@ -31,7 +33,13 @@ value_boxes <- list(
   )
 )
 
+fig4 <- readRDS("data/fig4.rds")
 
+proteomics_plot <- fig4 |>
+  ggplot(mapping = aes(x=log10(TPM), y=log10(Copy_number))) +
+  geom_point(size=0.8, colour = "grey") +
+  facet_wrap(vars(cell_type), nrow=1) +
+  theme_bw()
 
 
 
