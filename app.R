@@ -14,6 +14,8 @@ library(nplyr)
 # bs_icon("info-circle"),
 # "Tooltip message"
 # )
+# 
+# this is a list of tibbles so we don't need to filter for cell type within the app
 fig4 <- readRDS("data/fig4.rds")
 
 all_proteins <- fig4[[2]] |>
@@ -21,7 +23,13 @@ all_proteins <- fig4[[2]] |>
   unlist() |>
   unique()
 
-# have this as a list of tibbles so we don't need to filter within the app
+create_card <- function(i, data = fig4){
+  card(
+    full_screen = TRUE,
+    card_header(fig4[[1]][[i]]),
+    mod_scatter_ui(paste0("prot",i))
+  )
+}
 
 
 ui <- page_fillable(
@@ -64,29 +72,25 @@ ui <- page_fillable(
           popover(
             bsicons::bs_icon("gear", class = "ms-auto"),
             title = "Highlight options",
+            checkboxInput(
+              inputId = "show_names",
+              label   = "display selected names on plot"
+            ),
             selectizeInput(
               inputId   = "prot_to_highlight", 
               label     = 'Select protein(s) to highlight', 
               choices   = all_proteins, 
               multiple  = TRUE
-            ),
-            checkboxInput(
-              inputId = "show_names",
-              label   = "display protein names"
             )
           ),
           actionButton(inputId = "back_to_main2", "Back to main"),
           class = "d-flex align-items-center gap-1"
         ),
         layout_columns(
-          card(
-            card_header("FoB"),
-            plotOutput("proteomics1"),
-          ),
-          card(
-            card_header("MZ"),
-            plotOutput("proteomics2"),
-          )
+          create_card(1),
+          create_card(2),
+          create_card(3),
+          create_card(4)
         ),
         actionButton("browser", "browser")
       )
@@ -95,6 +99,9 @@ ui <- page_fillable(
 )
 
 server <- function(input, output, session) {
+  
+  filtered_subset <- reactiveVal()
+  display_names <- reactive(input$show_names)
   
   observeEvent(input$browser, browser())
   
@@ -110,81 +117,28 @@ server <- function(input, output, session) {
   observeEvent(input$back_to_main2, {
     updateTabsetPanel(session, "main_panel", selected = "landing_page")
   })
-  
-  output$proteomics1 <- renderPlot({
-    plot1()
-  })
-  
-  output$proteomics2 <- renderPlot({
-    plot2()
-  })
-  
-  plot1 <- reactive({
-    i <- 1
-    title <- pull(fig4[i,1])
-    dataset <- pull(fig4[i,2])[[1]]
-    data_cols <- colnames(dataset)[2:3]
-    label_column <- colnames(dataset)[1]
-        
-    p <- dataset |> 
-      ggplot(mapping = aes(x=.data[[data_cols[[1]]]], y=.data[[data_cols[[2]]]])) +
-      geom_point(size=0.8, colour = "grey") +
-      theme_bw()
-    
-    if (isTruthy(filtered_subset())) {
-      filt <- pull(filtered_subset()[i,2])[[1]] #|>
-      p <- p +
-        geom_point(data=filt, colour = "red")
-    }
-    if (input$show_names){
-      p <- p +
-        geom_text(data=filt, colour = "red" , aes(label = .data[[label_column]]), vjust = 1)
-    }
-    
-    p
-  })
-  
-  plot2 <- reactive({
-    
-    ggplot()
-    
-    # p <- fig4 |> 
-    #   filter(cell_type == "MZ") |>
-    #   ggplot(mapping = aes(x=log10(TPM), y=log10(Copy_number))) +
-    #     geom_point(size=0.8, colour = "grey") +
-    #     theme_bw()
-    # 
-    # if (isTruthy(filtered_subset())) {
-    #   filt <- filtered_subset() |>
-    #     filter(cell_type == "MZ")
-    #   p <- p +
-    #     geom_point(data=filt, colour = "red")
-    # }
-    # if (input$show_names){
-    #   p <- p +
-    #     geom_text(data=filt, colour = "red" , aes(label = `Protein IDs`), vjust = 1)
-    # }
-    # p
-  })
-  
-  observeEvent(input$prot_to_highlight, {
+
+  mod_scatter_server(id = "prot1", fig4, i=1, subset = filtered_subset, show_names = display_names)
+  mod_scatter_server(id = "prot2", fig4, i=2, subset = filtered_subset, show_names = display_names)
+  mod_scatter_server(id = "prot3", fig4, i=3, subset = filtered_subset, show_names = display_names)
+  mod_scatter_server(id = "prot4", fig4, i=4, subset = filtered_subset, show_names = display_names)
+
+  # this didn't work  
+  # for (x in 1:4){
+  #   mod_scatter_server(id = paste0("prot",x), fig4, i=x, subset = filtered_subset, show_names = display_names)
+  # }
+
+  observeEvent(input$prot_to_highlight, ignoreNULL = FALSE, {
     
     if(is.null(input$prot_to_highlight)) {
       filtered_subset(NULL)
     } else {
-    
-    filt <- fig4 |>
-      #lazy_dt() |>
-      nplyr::nest_filter(data, `Protein IDs` %in% input$prot_to_highlight)
-      #as_tibble()
-    
-    filtered_subset(filt)
+      filt <- fig4 |>
+        nplyr::nest_filter(data, `Protein IDs` %in% input$prot_to_highlight)
+      filtered_subset(filt)
     }
   })
-  
-  filtered_subset <- reactiveVal()
-  
-}
 
+}
 
 shinyApp(ui, server)
