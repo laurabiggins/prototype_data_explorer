@@ -33,13 +33,13 @@ value_boxes <- list(
   )
 )
 
-fig4 <- readRDS("data/fig4.rds")
-
-proteomics_plot <- fig4 |>
-  ggplot(mapping = aes(x=log10(TPM), y=log10(Copy_number))) +
-  geom_point(size=0.8, colour = "grey") +
-  facet_wrap(vars(cell_type), nrow=1) +
-  theme_bw()
+# fig4 <- readRDS("data/fig4.rds")
+# 
+# proteomics_plot <- fig4 |>
+#   ggplot(mapping = aes(x=log10(TPM), y=log10(Copy_number))) +
+#   geom_point(size=0.8, colour = "grey") +
+#   facet_wrap(vars(cell_type), nrow=1) +
+#   theme_bw()
 
 
 
